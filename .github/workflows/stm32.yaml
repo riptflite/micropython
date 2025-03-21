@@ -1,0 +1,28 @@
+name: Build MicroPython for STM32
+
+on:
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout MicroPython Source Code
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y gcc-arm-none-eabi cmake make python3
+
+      - name: Build MicroPython for STM32 (BluePill)
+        run: |
+          cd ports/stm32
+          make BOARD=BLUEPILL_F103C8
+
+      - name: Upload Firmware
+        uses: actions/upload-artifact@v3
+        with:
+          name: firmware-bin
+          path: ports/stm32/build-*/firmware.bin
