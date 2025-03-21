@@ -8,21 +8,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout MicroPython Source Code
-        uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt install -y gcc-arm-none-eabi cmake make python3
+          sudo apt install -y gcc-arm-none-eabi binutils-arm-none-eabi cmake make
 
-      - name: Build MicroPython for STM32 (BluePill)
+      - name: Configure and Build
         run: |
           cd ports/stm32
-          make BOARD=BLUEPILL_F103C8
+          make submodules
+          make BOARD=YOUR_BOARD
 
-      - name: Upload Firmware
-        uses: actions/upload-artifact@v3
+      - name: Check if Firmware Exists
+        run: |
+          if [ ! -f "ports/stm32/build-YOUR_BOARD/firmware.bin" ]; then
+            echo "Error: firmware.bin not found!"
+            exit 1
+          fi
+
+      - name: Upload Firmware Artifact
+        uses: actions/upload-artifact@v4
         with:
           name: firmware-bin
-          path: ports/stm32/build-*/firmware.bin
+          path: ports/stm32/build-YOUR_BOARD/firmware.bin
